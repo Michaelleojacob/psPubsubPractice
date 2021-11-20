@@ -1,33 +1,46 @@
-import ps from './Pubsub/Pubsub';
 import './style.css';
+import testingShowMeTheMoney from './testingSubs/testingShowMeTheMoney';
+import wrapAllIncrementNumberLogic from './testingSubs/incNum';
 import cached from './cacheDom/cacheDom';
+import ps from './Pubsub/Pubsub';
 
-// import testingShowMeTheMoney from './testingSubs/testingShowMeTheMoney';
-// testingShowMeTheMoney();
+testingShowMeTheMoney();
+wrapAllIncrementNumberLogic();
 
-// get the dom elements
-const { button, clickNum } = cached;
+const { form, input, counter, people } = cached;
 
-//
-const incrementNum = () => {
-  let num = 0;
+const removeAllChildNodes = (parent) => {
+  while (parent.firstChild) parent.removeChild(parent.firstChild);
+};
+const peopleArr = ['mike', 'sam', 'pedro'];
 
-  const getCurrNum = () => num;
+form.addEventListener('submit', (e) => e.preventDefault());
+form.addEventListener('submit', () => {
+  peopleArr.push(input.value);
+  input.value = '';
+  ps.publish('personUpdated', peopleArr);
+});
 
-  const increaseNumAndUpdateDisplay = () => {
-    num += 1;
-    clickNum.textContent = getCurrNum();
-  };
-
-  return { getCurrNum, increaseNumAndUpdateDisplay };
+const render = (arr) => {
+  removeAllChildNodes(people);
+  arr.map((x) => {
+    const element = document.createElement('div');
+    element.textContent = x;
+    element.classList.add('deleteMe');
+    return people.appendChild(element);
+  });
+  counter.textContent = arr.length;
 };
 
-const updoot = incrementNum();
-
-ps.subscribe('clicked', updoot.increaseNumAndUpdateDisplay);
-
-const handleClick = (e) => {
-  ps.publish('clicked', e);
+const handleDeleteMe = (e) => {
+  if (e.target.classList.contains('deleteMe')) {
+    peopleArr.splice(peopleArr.indexOf(e.target.textContent), 1);
+    ps.publish('personUpdated', peopleArr);
+  }
 };
 
-button.addEventListener('click', handleClick);
+people.addEventListener('click', handleDeleteMe);
+
+ps.subscribe('personUpdated', render);
+
+render(peopleArr);
