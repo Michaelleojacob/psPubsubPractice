@@ -1,7 +1,7 @@
 import cached from '../cacheDom/cacheDom';
 import ps from '../Pubsub/Pubsub';
 
-const wrapAllSubmitLogic = () => {
+export default function wrapAllSubmitLogic() {
   const { form, input, counter, people } = cached;
 
   const removeAllChildNodes = (parent) => {
@@ -39,6 +39,4 @@ const wrapAllSubmitLogic = () => {
   ps.subscribe('personUpdated', render);
 
   render(peopleArr);
-};
-
-export default wrapAllSubmitLogic;
+}
